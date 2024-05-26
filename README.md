@@ -8,6 +8,9 @@
   - [Todo (lol)](#todo-lol)
   <!--toc:end-->
 
+Example usage:
+[Example Image](./example.png)
+
 ## Installation
 
 Just go ahead and use any plugin manager you like, for example with LazyVim:
