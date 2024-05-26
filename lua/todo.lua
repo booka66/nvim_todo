@@ -380,7 +380,7 @@ function M.MarkImportant()
 		local updated_todo = nil
 		for i, todo in ipairs(todo_list) do
 			if todo.item == item then
-				todo_list[i].state = "important"
+				todo_list[i].state = todo_list[i].state == "important" and "normal" or "important"
 				updated_todo = todo_list[i]
 				break
 			end
@@ -392,7 +392,9 @@ function M.MarkImportant()
 			file:close()
 
 			if updated_todo then
-				local completed_mark = updated_todo.completed and "x" or "!"
+				local state_mark = updated_todo.state == "important" and "!"
+					or (updated_todo.state == "pending" and "-" or " ")
+				local completed_mark = updated_todo.completed and "x" or state_mark
 				vim.api.nvim_buf_set_lines(
 					buf,
 					vim.fn.line(".") - 1,
@@ -427,7 +429,7 @@ function M.MarkPending()
 		local updated_todo = nil
 		for i, todo in ipairs(todo_list) do
 			if todo.item == item then
-				todo_list[i].state = "pending"
+				todo_list[i].state = todo_list[i].state == "pending" and "normal" or "pending"
 				updated_todo = todo_list[i]
 				break
 			end
@@ -439,7 +441,9 @@ function M.MarkPending()
 			file:close()
 
 			if updated_todo then
-				local completed_mark = updated_todo.completed and "x" or "-"
+				local state_mark = updated_todo.state == "important" and "!"
+					or (updated_todo.state == "pending" and "-" or " ")
+				local completed_mark = updated_todo.completed and "x" or state_mark
 				vim.api.nvim_buf_set_lines(
 					buf,
 					vim.fn.line(".") - 1,
