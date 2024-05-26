@@ -89,12 +89,12 @@ function M.ShowTodo()
 
 	local win = vim.api.nvim_open_win(buf, true, opts)
 
-	-- Set the buffer to be read-only
-	-- vim.api.nvim_buf_set_option(buf, "modifiable", false)
-
 	-- Set up key mapping to edit an item or category
 	vim.api.nvim_buf_set_keymap(buf, "n", "e", ":lua EditItem()<CR>", { noremap = true, silent = true })
-
+	-- Set up key mapping to mark an item as important
+	vim.api.nvim_buf_set_keymap(buf, "n", "i", ":lua MarkImportant()<CR>", { noremap = true, silent = true })
+	-- Set up key mapping to mark an item as pending
+	vim.api.nvim_buf_set_keymap(buf, "n", "p", ":lua MarkPending()<CR>", { noremap = true, silent = true })
 	-- Set up key mapping to toggle completed status
 	vim.api.nvim_buf_set_keymap(buf, "n", "<CR>", ":lua ToggleCompleted()<CR>", { noremap = true, silent = true })
 	-- Set up key mapping to delete an item or category
@@ -330,7 +330,103 @@ function M.ToggleCompleted()
 
 			-- Update the current buffer instead of calling ShowTodo()
 			if updated_todo then
-				local completed_mark = updated_todo.completed and "x" or " "
+				local state_mark = updated_todo.state == "important" and "!"
+					or (updated_todo.state == "pending" and "-" or " ")
+				local completed_mark = updated_todo.completed and "x" or state_mark
+				vim.api.nvim_buf_set_lines(
+					buf,
+					vim.fn.line(".") - 1,
+					vim.fn.line("."),
+					false,
+					{ "- (" .. completed_mark .. ") " .. item }
+				)
+			end
+		else
+			vim.notify("Failed to write to file: " .. file_path, "error", { title = "Todo" })
+		end
+	end
+end
+
+function M.MarkImportant()
+	local buf = vim.api.nvim_get_current_buf()
+	local line = vim.api.nvim_get_current_line()
+
+	local item = string.match(line, "^%-%s%b()%s(.+)$")
+	if item then
+		local file_path = os.getenv("HOME") .. "/.todo.json"
+		local file = io.open(file_path, "r")
+		local todo_list = {}
+		if file then
+			local content = file:read("*all")
+			file:close()
+			if content ~= "" then
+				todo_list = vim.fn.json_decode(content)
+			end
+		end
+
+		local updated_todo = nil
+		for i, todo in ipairs(todo_list) do
+			if todo.item == item then
+				todo_list[i].state = "important"
+				updated_todo = todo_list[i]
+				break
+			end
+		end
+
+		local file = io.open(file_path, "w")
+		if file then
+			file:write(vim.fn.json_encode(todo_list))
+			file:close()
+
+			if updated_todo then
+				local completed_mark = updated_todo.completed and "x" or "!"
+				vim.api.nvim_buf_set_lines(
+					buf,
+					vim.fn.line(".") - 1,
+					vim.fn.line("."),
+					false,
+					{ "- (" .. completed_mark .. ") " .. item }
+				)
+			end
+		else
+			vim.notify("Failed to write to file: " .. file_path, "error", { title = "Todo" })
+		end
+	end
+end
+
+function M.MarkPending()
+	local buf = vim.api.nvim_get_current_buf()
+	local line = vim.api.nvim_get_current_line()
+
+	local item = string.match(line, "^%-%s%b()%s(.+)$")
+	if item then
+		local file_path = os.getenv("HOME") .. "/.todo.json"
+		local file = io.open(file_path, "r")
+		local todo_list = {}
+		if file then
+			local content = file:read("*all")
+			file:close()
+			if content ~= "" then
+				todo_list = vim.fn.json_decode(content)
+			end
+		end
+
+		local updated_todo = nil
+		for i, todo in ipairs(todo_list) do
+			if todo.item == item then
+				todo_list[i].state = "pending"
+				updated_todo = todo_list[i]
+				break
+			end
+		end
+
+		local file = io.open(file_path, "w")
+		if file then
+			file:write(vim.fn.json_encode(todo_list))
+			file:close()
+
+			if updated_todo then
+				local completed_mark = updated_todo.completed and "x" or "-"
 				vim.api.nvim_buf_set_lines(
 					buf,
 					vim.fn.line(".") - 1,
