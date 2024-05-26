@@ -20,9 +20,25 @@ function M.set_keymaps()
 	)
 end
 
+function M.OpenJsonFile()
+	local file_path = os.getenv("HOME") .. "/.todo.json"
+	vim.cmd("edit " .. file_path)
+end
+
+function M.HandleCommand(arg)
+	if arg == "json" then
+		M.OpenJsonFile()
+	else
+		vim.notify("Invalid argument for :Todo command", "error", { title = "Todo" })
+	end
+end
+
 function M.setup(opts)
 	opts = opts or {}
 	M.set_keymaps()
+	vim.cmd([[
+    command! -nargs=1 Todo lua require('todo').HandleCommand(<f-args>)
+    ]])
 end
 
 function M.ShowTodo()
