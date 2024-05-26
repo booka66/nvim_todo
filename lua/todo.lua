@@ -84,11 +84,7 @@ function M.ShowTodo()
 		for _, todo in ipairs(categories[category]) do
 			local state_mark = todo.state == "important" and "!" or (todo.state == "pending" and "-" or " ")
 			local completed_mark = todo.completed and "x" or state_mark
-			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item
-			if todo.file then
-				neorg_content = neorg_content .. " [" .. todo.file .. "]"
-			end
-			neorg_content = neorg_content .. "\n"
+			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item .. "\n"
 		end
 	end
 
@@ -109,8 +105,7 @@ function M.ShowTodo()
 	}
 
 	local win = vim.api.nvim_open_win(buf, true, opts)
-	-- Set up key mapping to open the associated file
-	vim.api.nvim_buf_set_keymap(buf, "n", "l", ":lua require('todo').OpenFile()<CR>", { noremap = true, silent = true })
+
 	-- Set up key mapping to edit an item or category
 	vim.api.nvim_buf_set_keymap(buf, "n", "e", ":lua EditItem()<CR>", { noremap = true, silent = true })
 	-- Set up key mapping to mark an item as important
@@ -148,17 +143,6 @@ function M.ShowTodo()
 		":lua vim.api.nvim_win_close(0, true)<CR>",
 		{ noremap = true, silent = true }
 	)
-end
-
-function M.OpenFile()
-	local line = vim.api.nvim_get_current_line()
-
-	local file_path = string.match(line, "%[(.-)%]")
-	if file_path then
-		vim.cmd("edit " .. file_path)
-	else
-		vim.notify("No file associated with this todo item", "info", { title = "Todo" })
-	end
 end
 
 function M.EditItem()
@@ -585,14 +569,11 @@ function M.AddTodoItemWithCategory(category)
 		if item then
 			local file_path = os.getenv("HOME") .. "/.todo.json"
 			local current_time = os.date("%Y-%m-%d %H:%M:%S")
-			local current_file = vim.fn.expand("%:p")
-			vim.notify("Current file: " .. current_file, "info", { title = "Todo" })
 			local todo_entry = {
 				item = item,
 				category = category,
 				created = current_time,
 				completed = false,
-				file = current_file ~= "" and current_file or nil,
 			}
 
 			local file = io.open(file_path, "r")
@@ -609,8 +590,7 @@ function M.AddTodoItemWithCategory(category)
 
 			local file = io.open(file_path, "w")
 			if file then
-				local json_content = vim.fn.json_encode(todo_list)
-				file:write(json_content)
+				file:write(vim.fn.json_encode(todo_list))
 				file:close()
 				vim.notify("Todo item added successfully!", "info", { title = "Todo" })
 			else
