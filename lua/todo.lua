@@ -84,7 +84,11 @@ function M.ShowTodo()
 		for _, todo in ipairs(categories[category]) do
 			local state_mark = todo.state == "important" and "!" or (todo.state == "pending" and "-" or " ")
 			local completed_mark = todo.completed and "x" or state_mark
-			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item .. "\n"
+			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item
+			if todo.file then
+				neorg_content = neorg_content .. " [" .. todo.file .. "]"
+			end
+			neorg_content = neorg_content .. "\n"
 		end
 	end
 
@@ -147,28 +151,13 @@ function M.ShowTodo()
 end
 
 function M.OpenFile()
-	local buf = vim.api.nvim_get_current_buf()
 	local line = vim.api.nvim_get_current_line()
 
-	local item = string.match(line, "^%-%s%b()%s(.+)$")
-	if item then
-		local file_path = os.getenv("HOME") .. "/.todo.json"
-		local file = io.open(file_path, "r")
-		local todo_list = {}
-		if file then
-			local content = file:read("*all")
-			file:close()
-			if content ~= "" then
-				todo_list = vim.fn.json_decode(content)
-			end
-		end
-
-		for _, todo in ipairs(todo_list) do
-			if todo.item == item and todo.file then
-				vim.cmd("edit " .. todo.file)
-				break
-			end
-		end
+	local file_path = string.match(line, "%[(.-)%]")
+	if file_path then
+		vim.cmd("edit " .. file_path)
+	else
+		vim.notify("No file associated with this todo item", "info", { title = "Todo" })
 	end
 end
 
