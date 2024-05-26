@@ -3,7 +3,9 @@
 <!--toc:start-->
 
 - [It's a todo list... that's about it](#its-a-todo-list-thats-about-it)
+  - [Installation](#installation)
   - [Usage](#usage)
+  - [Todo (lol)](#todo-lol)
   <!--toc:end-->
 
 ## Installation
@@ -25,6 +27,13 @@ You're gonna need Neorg for this to work (or at least look good), so make sure y
 - \<leader\>tn - New todo item
 - \<leader\>to - Open todo list
   - esc or q: close the popup
-  - d: delete item (or category including all items)
   - enter: toggle item as done
+  - i: toggle item as important
+  - p: toggle item as pending
   - e: edit item (or category)
+  - d: delete item (or category including all items)
+
+## Todo (lol)
+
+- Clear all done items after 5 (?) days of completion
+- Associate items with the files they were created in (hit l to jump to the file)
