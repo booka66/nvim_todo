@@ -585,7 +585,8 @@ function M.AddTodoItemWithCategory(category)
 		if item then
 			local file_path = os.getenv("HOME") .. "/.todo.json"
 			local current_time = os.date("%Y-%m-%d %H:%M:%S")
-			local current_file = vim.api.nvim_buf_get_name(0)
+			local current_file = vim.fn.expand("%:p")
+			vim.notify("Current file: " .. current_file, "info", { title = "Todo" })
 			local todo_entry = {
 				item = item,
 				category = category,
