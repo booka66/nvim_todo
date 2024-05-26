@@ -478,7 +478,6 @@ function M.AddTodoItem()
 	local file_path = os.getenv("HOME") .. "/.todo.json"
 	local file = io.open(file_path, "r")
 	local todo_list = {}
-	local current_file = vim.api.nvim_buf_get_name(0)
 
 	if file then
 		local content = file:read("*all")
@@ -502,7 +501,7 @@ function M.AddTodoItem()
 			prompt = "Enter a new category: ",
 		}, function(category)
 			if category then
-				AddTodoItemWithCategory(category, current_file)
+				AddTodoItemWithCategory(category)
 			else
 				print("No category entered.")
 			end
@@ -552,9 +551,9 @@ function M.AddTodoItem()
 			if input then
 				local selected_category = keys[input:lower()]
 				if selected_category then
-					AddTodoItemWithCategory(selected_category, current_file)
+					AddTodoItemWithCategory(selected_category)
 				else
-					AddTodoItemWithCategory(input, current_file)
+					AddTodoItemWithCategory(input)
 				end
 			else
 				print("No input provided.")
@@ -563,7 +562,7 @@ function M.AddTodoItem()
 	end
 end
 
-function M.AddTodoItemWithCategory(category, current_file)
+function M.AddTodoItemWithCategory(category)
 	vim.ui.input({
 		prompt = "Add item to '" .. category .. "':",
 	}, function(item)
@@ -572,7 +571,6 @@ function M.AddTodoItemWithCategory(category, current_file)
 			local current_time = os.date("%Y-%m-%d %H:%M:%S")
 			local todo_entry = {
 				item = item,
-				current_file = current_file,
 				category = category,
 				created = current_time,
 				completed = false,
