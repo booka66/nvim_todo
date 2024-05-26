@@ -66,7 +66,8 @@ function M.ShowTodo()
 		end)
 
 		for _, todo in ipairs(categories[category]) do
-			local completed_mark = todo.completed and "x" or " "
+			local state_mark = todo.state == "important" and "!" or (todo.state == "pending" and "-" or " ")
+			local completed_mark = todo.completed and "x" or state_mark
 			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item .. "\n"
 		end
 	end
