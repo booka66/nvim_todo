@@ -105,7 +105,8 @@ function M.ShowTodo()
 	}
 
 	local win = vim.api.nvim_open_win(buf, true, opts)
-
+	-- Set up key mapping to open the associated file
+	vim.api.nvim_buf_set_keymap(buf, "n", "l", ":lua require('todo').OpenFile()<CR>", { noremap = true, silent = true })
 	-- Set up key mapping to edit an item or category
 	vim.api.nvim_buf_set_keymap(buf, "n", "e", ":lua EditItem()<CR>", { noremap = true, silent = true })
 	-- Set up key mapping to mark an item as important
@@ -143,6 +144,32 @@ function M.ShowTodo()
 		":lua vim.api.nvim_win_close(0, true)<CR>",
 		{ noremap = true, silent = true }
 	)
+end
+
+function M.OpenFile()
+	local buf = vim.api.nvim_get_current_buf()
+	local line = vim.api.nvim_get_current_line()
+
+	local item = string.match(line, "^%-%s%b()%s(.+)$")
+	if item then
+		local file_path = os.getenv("HOME") .. "/.todo.json"
+		local file = io.open(file_path, "r")
+		local todo_list = {}
+		if file then
+			local content = file:read("*all")
+			file:close()
+			if content ~= "" then
+				todo_list = vim.fn.json_decode(content)
+			end
+		end
+
+		for _, todo in ipairs(todo_list) do
+			if todo.item == item and todo.file then
+				vim.cmd("edit " .. todo.file)
+				break
+			end
+		end
+	end
 end
 
 function M.EditItem()
@@ -569,11 +596,13 @@ function M.AddTodoItemWithCategory(category)
 		if item then
 			local file_path = os.getenv("HOME") .. "/.todo.json"
 			local current_time = os.date("%Y-%m-%d %H:%M:%S")
+			local current_file = vim.api.nvim_buf_get_name(0)
 			local todo_entry = {
 				item = item,
 				category = category,
 				created = current_time,
 				completed = false,
+				file = current_file ~= "" and current_file or nil,
 			}
 
 			local file = io.open(file_path, "r")
