@@ -22,8 +22,8 @@ You're gonna need Neorg for this to work (or at least look good), so make sure y
 
 ## Usage
 
-- <leader>tn - New todo item
-- <leader>to - Open todo list
+- \<leader\>tn - New todo item
+- \<leader\>to - Open todo list
   - esc or q: close the popup
   - d: delete item (or category including all items)
   - enter: toggle item as done
