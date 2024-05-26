@@ -1,5 +1,30 @@
 local M = {}
 
+function M.set_keymaps()
+	local opts = { noremap = true, silent = true }
+
+	-- Make a new todo item
+	vim.api.nvim_set_keymap(
+		"n",
+		"<leader>tn",
+		":lua require('todo').AddTodoItem()<CR>",
+		{ noremap = true, silent = true, desc = "[nvim-todo] Create Todo Item" }
+	)
+
+	-- Toggle Todo list
+	vim.api.nvim_set_keymap(
+		"n",
+		"<leader>to",
+		":lua require('todo').ShowTodo()<CR>",
+		{ noremap = true, silent = true, desc = "[nvim-todo] Toggle Todo" }
+	)
+end
+
+function M.setup(opts)
+	opts = opts or {}
+	M.set_keymaps()
+end
+
 function M.ShowTodo()
 	local file_path = os.getenv("HOME") .. "/.todo.json"
 	local file = io.open(file_path, "r")

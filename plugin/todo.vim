@@ -2,7 +2,7 @@ if exists('g:loaded_todo') | finish | endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-command! Todo lua require('todo').ShowTodo()
+lua require('todo').setup()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
