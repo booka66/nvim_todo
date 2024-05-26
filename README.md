@@ -26,6 +26,8 @@ You're gonna need Neorg for this to work (or at least look good), so make sure y
 
 Example usage:
 ![Example Image](./example.png)
+Creating a new todo item:
+![New Item Image](./new_item.png)
 
 - \<leader\>tn - New todo item
 - \<leader\>to - Open todo list
