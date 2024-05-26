@@ -23,40 +23,6 @@ end
 function M.setup(opts)
 	opts = opts or {}
 	M.set_keymaps()
-	M.AskForName()
-end
-
-function M.AskForName()
-	local file_path = os.getenv("HOME") .. "/.todo.json"
-	local file = io.open(file_path, "r")
-	local todo_data = {}
-	if file then
-		local content = file:read("*all")
-		file:close()
-		if content ~= "" then
-			todo_data = vim.fn.json_decode(content)
-		end
-	end
-
-	if not todo_data.name then
-		vim.ui.input({
-			prompt = "Enter your name: ",
-		}, function(name)
-			if name then
-				todo_data.name = name
-				local file = io.open(file_path, "w")
-				if file then
-					file:write(vim.fn.json_encode(todo_data))
-					file:close()
-					vim.notify("Welcome, " .. name .. "!", "info", { title = "Todo" })
-				else
-					vim.notify("Failed to write to file: " .. file_path, "error", { title = "Todo" })
-				end
-			else
-				print("No name entered.")
-			end
-		end)
-	end
 end
 
 function M.ShowTodo()
@@ -70,13 +36,10 @@ function M.ShowTodo()
 	local content = file:read("*all")
 	file:close()
 
-	local todo_data = {}
+	local todo_list = {}
 	if content ~= "" then
-		todo_data = vim.fn.json_decode(content)
+		todo_list = vim.fn.json_decode(content)
 	end
-
-	local todo_list = todo_data.list or {}
-	local name = todo_data.name or "User"
 
 	local categories = {}
 	for _, todo in ipairs(todo_list) do
@@ -93,7 +56,7 @@ function M.ShowTodo()
 	end
 	table.sort(sorted_categories)
 
-	local neorg_content = "*" .. name .. "'s Todo List*\n"
+	local neorg_content = "*Todo List*\n"
 	for _, category in ipairs(sorted_categories) do
 		neorg_content = neorg_content .. "* " .. category .. "\n"
 
