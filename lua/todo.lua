@@ -608,7 +608,8 @@ function M.AddTodoItemWithCategory(category)
 
 			local file = io.open(file_path, "w")
 			if file then
-				file:write(vim.fn.json_encode(todo_list))
+				local json_content = vim.fn.json_encode(todo_list)
+				file:write(json_content)
 				file:close()
 				vim.notify("Todo item added successfully!", "info", { title = "Todo" })
 			else
