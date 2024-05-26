@@ -8,9 +8,6 @@
   - [Todo (lol)](#todo-lol)
   <!--toc:end-->
 
-Example usage:
-[Example Image](./example.png)
-
 ## Installation
 
 Just go ahead and use any plugin manager you like, for example with LazyVim:
@@ -26,6 +23,9 @@ return {
 You're gonna need Neorg for this to work (or at least look good), so make sure you have that installed. The plugin will write a ~/.todo.json file to store your todo items. The popup is made by parsing this file, so if you delete it, you'll lose your todo list. The popup is rendered using Neorg's stuff, so that's why you'll need it to look good.
 
 ## Usage
+
+Example usage:
+![Example Image](./example.png)
 
 - \<leader\>tn - New todo item
 - \<leader\>to - Open todo list
