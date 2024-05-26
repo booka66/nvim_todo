@@ -92,9 +92,21 @@ function M.ShowTodo()
 	-- Set up key mapping to edit an item or category
 	vim.api.nvim_buf_set_keymap(buf, "n", "e", ":lua EditItem()<CR>", { noremap = true, silent = true })
 	-- Set up key mapping to mark an item as important
-	vim.api.nvim_buf_set_keymap(buf, "n", "i", ":lua MarkImportant()<CR>", { noremap = true, silent = true })
+	vim.api.nvim_buf_set_keymap(
+		buf,
+		"n",
+		"i",
+		":lua require('todo').MarkImportant()<CR>",
+		{ noremap = true, silent = true }
+	)
 	-- Set up key mapping to mark an item as pending
-	vim.api.nvim_buf_set_keymap(buf, "n", "p", ":lua MarkPending()<CR>", { noremap = true, silent = true })
+	vim.api.nvim_buf_set_keymap(
+		buf,
+		"n",
+		"p",
+		":lua require('todo').MarkPending()<CR>",
+		{ noremap = true, silent = true }
+	)
 	-- Set up key mapping to toggle completed status
 	vim.api.nvim_buf_set_keymap(buf, "n", "<CR>", ":lua ToggleCompleted()<CR>", { noremap = true, silent = true })
 	-- Set up key mapping to delete an item or category
