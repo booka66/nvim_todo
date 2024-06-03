@@ -57,31 +57,17 @@ function M.ShowTodo()
 		todo_list = vim.fn.json_decode(content)
 	end
 
-	-- Remove completed items older than a week
 	local current_time = os.time()
 	local one_week_ago = current_time - (7 * 24 * 60 * 60) -- 7 days in seconds
-	local updated_todo_list = {}
-	for _, todo in ipairs(todo_list) do
-		if not todo.completed or (todo.completed_time and todo.completed_time > one_week_ago) then
-			table.insert(updated_todo_list, todo)
-		end
-	end
-
-	-- Update the JSON file with the updated todo list
-	local file = io.open(file_path, "w")
-	if file then
-		file:write(vim.fn.json_encode(updated_todo_list))
-		file:close()
-	else
-		vim.notify("Failed to write to file: " .. file_path, "error", { title = "Todo" })
-	end
 
 	local categories = {}
-	for _, todo in ipairs(updated_todo_list) do
-		if not categories[todo.category] then
-			categories[todo.category] = {}
+	for _, todo in ipairs(todo_list) do
+		if not todo.completed or (todo.completed_time and todo.completed_time > one_week_ago) then
+			if not categories[todo.category] then
+				categories[todo.category] = {}
+			end
+			table.insert(categories[todo.category], todo)
 		end
-		table.insert(categories[todo.category], todo)
 	end
 
 	-- Sort the categories alphabetically
