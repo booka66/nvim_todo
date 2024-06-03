@@ -381,8 +381,11 @@ function M.ToggleCompleted()
 					or (updated_todo.state == "pending" and "-" or " ")
 				local completed_mark = updated_todo.completed and "x" or state_mark
 				local current_time = os.time()
-				local days_remaining =
-					math.floor((updated_todo.completed_time + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60))
+				local days_remaining = updated_todo.completed
+						and math.floor(
+							(updated_todo.completed_time + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60)
+						)
+					or 0
 				local delete_text = updated_todo.completed and " (Deletes in " .. days_remaining .. " days)" or ""
 				vim.api.nvim_buf_set_lines(
 					buf,
@@ -596,6 +599,7 @@ function M.AddTodoItemWithCategory(category)
 				category = category,
 				created = current_time,
 				completed = false,
+				completed_time = nil,
 			}
 
 			local file = io.open(file_path, "r")
