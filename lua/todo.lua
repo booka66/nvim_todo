@@ -62,7 +62,21 @@ function M.ShowTodo()
 
 	local categories = {}
 	for _, todo in ipairs(todo_list) do
-		if not todo.completed or (todo.completed_time and todo.completed_time > one_week_ago) then
+		if
+			not todo.completed
+			or (
+				todo.completed_on
+				and os.time({
+						year = todo.completed_on:match("^%d+"),
+						month = todo.completed_on:match("%-(%d+)%-"),
+						day = todo.completed_on:match("%-(%d+)$"),
+						hour = 0,
+						min = 0,
+						sec = 0,
+					})
+					> one_week_ago
+			)
+		then
 			if not categories[todo.category] then
 				categories[todo.category] = {}
 			end
@@ -92,8 +106,20 @@ function M.ShowTodo()
 			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item
 
 			if todo.completed then
-				local days_remaining =
-					math.floor((todo.completed_time + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60))
+				local days_remaining = math.floor(
+					(
+						os.time({
+							year = todo.completed_on:match("^%d+"),
+							month = todo.completed_on:match("%-(%d+)%-"),
+							day = todo.completed_on:match("%-(%d+)$"),
+							hour = 0,
+							min = 0,
+							sec = 0,
+						})
+						+ (7 * 24 * 60 * 60)
+						- current_time
+					) / (24 * 60 * 60)
+				)
 				neorg_content = neorg_content .. " (Deletes in " .. days_remaining .. " days)"
 			end
 
@@ -361,9 +387,9 @@ function M.ToggleCompleted()
 			if todo.item == item then
 				todo_list[i].completed = not todo_list[i].completed
 				if todo_list[i].completed then
-					todo_list[i].completed_time = os.time()
+					todo_list[i].completed_on = os.date("%Y-%m-%d %H:%M:%S")
 				else
-					todo_list[i].completed_time = nil
+					todo_list[i].completed_on = nil
 				end
 				updated_todo = todo_list[i]
 				break
@@ -382,9 +408,14 @@ function M.ToggleCompleted()
 				local completed_mark = updated_todo.completed and "x" or state_mark
 				local current_time = os.time()
 				local days_remaining = updated_todo.completed
-						and math.floor(
-							(updated_todo.completed_time + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60)
-						)
+						and math.floor((os.time({
+							year = updated_todo.completed_on:match("^%d+"),
+							month = updated_todo.completed_on:match("%-(%d+)%-"),
+							day = updated_todo.completed_on:match("%-(%d+)$"),
+							hour = 0,
+							min = 0,
+							sec = 0,
+						}) + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60))
 					or 0
 				local delete_text = updated_todo.completed and " (Deletes in " .. days_remaining .. " days)" or ""
 				vim.api.nvim_buf_set_lines(
