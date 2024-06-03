@@ -67,12 +67,9 @@ function M.ShowTodo()
 			or (
 				todo.completed_on
 				and os.time({
-						year = todo.completed_on:match("^%d+"),
+						year = todo.completed_on:match("^(%d+)"),
 						month = todo.completed_on:match("%-(%d+)%-"),
 						day = todo.completed_on:match("%-(%d+)$"),
-						hour = 0,
-						min = 0,
-						sec = 0,
 					})
 					> one_week_ago
 			)
@@ -105,16 +102,13 @@ function M.ShowTodo()
 			local completed_mark = todo.completed and "x" or state_mark
 			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item
 
-			if todo.completed then
+			if todo.completed and todo.completed_on then
 				local days_remaining = math.floor(
 					(
 						os.time({
-							year = todo.completed_on:match("^%d+"),
+							year = todo.completed_on:match("^(%d+)"),
 							month = todo.completed_on:match("%-(%d+)%-"),
 							day = todo.completed_on:match("%-(%d+)$"),
-							hour = 0,
-							min = 0,
-							sec = 0,
 						})
 						+ (7 * 24 * 60 * 60)
 						- current_time
@@ -408,13 +402,11 @@ function M.ToggleCompleted()
 				local completed_mark = updated_todo.completed and "x" or state_mark
 				local current_time = os.time()
 				local days_remaining = updated_todo.completed
+						and updated_todo.completed_on
 						and math.floor((os.time({
-							year = updated_todo.completed_on:match("^%d+"),
+							year = updated_todo.completed_on:match("^(%d+)"),
 							month = updated_todo.completed_on:match("%-(%d+)%-"),
 							day = updated_todo.completed_on:match("%-(%d+)$"),
-							hour = 0,
-							min = 0,
-							sec = 0,
 						}) + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60))
 					or 0
 				local delete_text = updated_todo.completed and " (Deletes in " .. days_remaining .. " days)" or ""
