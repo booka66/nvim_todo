@@ -57,28 +57,12 @@ function M.ShowTodo()
 		todo_list = vim.fn.json_decode(content)
 	end
 
-	local current_time = os.time()
-	local one_week_ago = current_time - (7 * 24 * 60 * 60) -- 7 days in seconds
-
 	local categories = {}
 	for _, todo in ipairs(todo_list) do
-		if
-			not todo.completed
-			or (
-				todo.completed_on
-				and os.time({
-						year = todo.completed_on:match("^(%d+)"),
-						month = todo.completed_on:match("%-(%d+)%-"),
-						day = todo.completed_on:match("%-(%d+)$"),
-					})
-					> one_week_ago
-			)
-		then
-			if not categories[todo.category] then
-				categories[todo.category] = {}
-			end
-			table.insert(categories[todo.category], todo)
+		if not categories[todo.category] then
+			categories[todo.category] = {}
 		end
+		table.insert(categories[todo.category], todo)
 	end
 
 	-- Sort the categories alphabetically
@@ -100,24 +84,7 @@ function M.ShowTodo()
 		for _, todo in ipairs(categories[category]) do
 			local state_mark = todo.state == "important" and "!" or (todo.state == "pending" and "-" or " ")
 			local completed_mark = todo.completed and "x" or state_mark
-			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item
-
-			if todo.completed and todo.completed_on then
-				local days_remaining = math.floor(
-					(
-						os.time({
-							year = todo.completed_on:match("^(%d+)"),
-							month = todo.completed_on:match("%-(%d+)%-"),
-							day = todo.completed_on:match("%-(%d+)$"),
-						})
-						+ (7 * 24 * 60 * 60)
-						- current_time
-					) / (24 * 60 * 60)
-				)
-				neorg_content = neorg_content .. " (Deletes in " .. days_remaining .. " days)"
-			end
-
-			neorg_content = neorg_content .. "\n"
+			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item .. "\n"
 		end
 	end
 
@@ -380,11 +347,6 @@ function M.ToggleCompleted()
 		for i, todo in ipairs(todo_list) do
 			if todo.item == item then
 				todo_list[i].completed = not todo_list[i].completed
-				if todo_list[i].completed then
-					todo_list[i].completed_on = os.date("%Y-%m-%d %H:%M:%S")
-				else
-					todo_list[i].completed_on = nil
-				end
 				updated_todo = todo_list[i]
 				break
 			end
@@ -400,22 +362,12 @@ function M.ToggleCompleted()
 				local state_mark = updated_todo.state == "important" and "!"
 					or (updated_todo.state == "pending" and "-" or " ")
 				local completed_mark = updated_todo.completed and "x" or state_mark
-				local current_time = os.time()
-				local days_remaining = updated_todo.completed
-						and updated_todo.completed_on
-						and math.floor((os.time({
-							year = updated_todo.completed_on:match("^(%d+)"),
-							month = updated_todo.completed_on:match("%-(%d+)%-"),
-							day = updated_todo.completed_on:match("%-(%d+)$"),
-						}) + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60))
-					or 0
-				local delete_text = updated_todo.completed and " (Deletes in " .. days_remaining .. " days)" or ""
 				vim.api.nvim_buf_set_lines(
 					buf,
 					vim.fn.line(".") - 1,
 					vim.fn.line("."),
 					false,
-					{ "- (" .. completed_mark .. ") " .. item .. delete_text }
+					{ "- (" .. completed_mark .. ") " .. item }
 				)
 			end
 		else
@@ -526,7 +478,6 @@ function M.AddTodoItem()
 	local file_path = os.getenv("HOME") .. "/.todo.json"
 	local file = io.open(file_path, "r")
 	local todo_list = {}
-	local current_file = vim.api.nvim_buf_get_name(0)
 
 	if file then
 		local content = file:read("*all")
@@ -550,7 +501,7 @@ function M.AddTodoItem()
 			prompt = "Enter a new category: ",
 		}, function(category)
 			if category then
-				AddTodoItemWithCategory(category, current_file)
+				AddTodoItemWithCategory(category)
 			else
 				print("No category entered.")
 			end
@@ -600,9 +551,9 @@ function M.AddTodoItem()
 			if input then
 				local selected_category = keys[input:lower()]
 				if selected_category then
-					AddTodoItemWithCategory(selected_category, current_file)
+					AddTodoItemWithCategory(selected_category)
 				else
-					AddTodoItemWithCategory(input, current_file)
+					AddTodoItemWithCategory(input)
 				end
 			else
 				print("No input provided.")
@@ -611,7 +562,7 @@ function M.AddTodoItem()
 	end
 end
 
-function M.AddTodoItemWithCategory(category, current_file)
+function M.AddTodoItemWithCategory(category)
 	vim.ui.input({
 		prompt = "Add item to '" .. category .. "':",
 	}, function(item)
@@ -620,11 +571,9 @@ function M.AddTodoItemWithCategory(category, current_file)
 			local current_time = os.date("%Y-%m-%d %H:%M:%S")
 			local todo_entry = {
 				item = item,
-				current_file = current_file,
 				category = category,
 				created = current_time,
 				completed = false,
-				completed_time = nil,
 			}
 
 			local file = io.open(file_path, "r")
