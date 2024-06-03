@@ -77,7 +77,7 @@ function M.ShowTodo()
 	end
 
 	local categories = {}
-	for _, todo in ipairs(todo_list) do
+	for _, todo in ipairs(updated_todo_list) do
 		if not categories[todo.category] then
 			categories[todo.category] = {}
 		end
@@ -103,7 +103,15 @@ function M.ShowTodo()
 		for _, todo in ipairs(categories[category]) do
 			local state_mark = todo.state == "important" and "!" or (todo.state == "pending" and "-" or " ")
 			local completed_mark = todo.completed and "x" or state_mark
-			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item .. "\n"
+			neorg_content = neorg_content .. "- (" .. completed_mark .. ") " .. todo.item
+
+			if todo.completed then
+				local days_remaining =
+					math.floor((todo.completed_time + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60))
+				neorg_content = neorg_content .. " (Deletes in " .. days_remaining .. " days)"
+			end
+
+			neorg_content = neorg_content .. "\n"
 		end
 	end
 
@@ -386,12 +394,16 @@ function M.ToggleCompleted()
 				local state_mark = updated_todo.state == "important" and "!"
 					or (updated_todo.state == "pending" and "-" or " ")
 				local completed_mark = updated_todo.completed and "x" or state_mark
+				local current_time = os.time()
+				local days_remaining =
+					math.floor((updated_todo.completed_time + (7 * 24 * 60 * 60) - current_time) / (24 * 60 * 60))
+				local delete_text = updated_todo.completed and " (Deletes in " .. days_remaining .. " days)" or ""
 				vim.api.nvim_buf_set_lines(
 					buf,
 					vim.fn.line(".") - 1,
 					vim.fn.line("."),
 					false,
-					{ "- (" .. completed_mark .. ") " .. item }
+					{ "- (" .. completed_mark .. ") " .. item .. delete_text }
 				)
 			end
 		else
