@@ -78,17 +78,17 @@ function M.ShowTodo()
 
 		-- Sort the todo items within each category
 		table.sort(categories[category], function(a, b)
-			-- First, sort by importance (important items first)
-			if a.state == "important" and b.state ~= "important" then
-				return true
-			elseif b.state == "important" and a.state ~= "important" then
-				return false
-			end
-
-			-- Then, sort by completion status (not done items first)
+			-- First, sort by completion status (not done items first)
 			if not a.completed and b.completed then
 				return true
 			elseif a.completed and not b.completed then
+				return false
+			end
+
+			-- Then, sort by importance (important items first)
+			if a.state == "important" and b.state ~= "important" then
+				return true
+			elseif b.state == "important" and a.state ~= "important" then
 				return false
 			end
 
