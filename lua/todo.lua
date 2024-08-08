@@ -76,9 +76,24 @@ function M.ShowTodo()
 	for _, category in ipairs(sorted_categories) do
 		neorg_content = neorg_content .. "* " .. category .. "\n"
 
-		-- Sort the todo items within each category chronologically
+		-- Sort the todo items within each category
 		table.sort(categories[category], function(a, b)
-			return a.created < b.created
+			-- First, sort by importance (important items first)
+			if a.state == "important" and b.state ~= "important" then
+				return true
+			elseif b.state == "important" and a.state ~= "important" then
+				return false
+			end
+
+			-- Then, sort by completion status (not done items first)
+			if not a.completed and b.completed then
+				return true
+			elseif a.completed and not b.completed then
+				return false
+			end
+
+			-- Finally, sort by creation date (newest first)
+			return a.created > b.created
 		end)
 
 		for _, todo in ipairs(categories[category]) do
