@@ -1,5 +1,26 @@
 local M = {}
 
+function M.ensure_todo_file_exists()
+	local file_path = os.getenv("HOME") .. "/.todo.json"
+	local file = io.open(file_path, "r")
+
+	if not file then
+		-- File doesn't exist, create it with an empty array
+		file = io.open(file_path, "w")
+		if file then
+			file:write("[]")
+			file:close()
+			vim.notify("Created new todo.json file", "info", { title = "Todo" })
+		else
+			vim.notify("Failed to create todo.json file", "error", { title = "Todo" })
+			return false
+		end
+	else
+		file:close()
+	end
+	return true
+end
+
 function M.set_keymaps()
 	local opts = { noremap = true, silent = true }
 
@@ -22,6 +43,7 @@ end
 
 function M.OpenJsonFile()
 	local file_path = os.getenv("HOME") .. "/.todo.json"
+	M.ensure_todo_file_exists() -- Ensure file exists before opening
 	vim.cmd("edit " .. file_path)
 end
 
@@ -35,6 +57,7 @@ end
 
 function M.setup(opts)
 	opts = opts or {}
+	M.ensure_todo_file_exists() -- Ensure file exists during setup
 	M.set_keymaps()
 	vim.cmd([[
     command! -nargs=1 Todo lua require('todo').HandleCommand(<f-args>)
@@ -42,6 +65,9 @@ function M.setup(opts)
 end
 
 function M.ShowTodo()
+	if not M.ensure_todo_file_exists() then
+		return
+	end
 	local file_path = os.getenv("HOME") .. "/.todo.json"
 	local file = io.open(file_path, "r")
 	if not file then
